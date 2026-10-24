@@ -23,8 +23,8 @@ def render_heatmap(payload, static=False):
     grid_start = start - timedelta(days=(start.weekday() + 1) % 7)
     days = {day['date']: day for day in payload['days']}
     stats = payload['stats']
-    parts = svg_start(860, 326, f"Contribution calendar for {payload['username']}",
-                      f"{stats['total']:,} contributions in the last year, {start} through {end}. Public GitHub data. Longest streak in this interval: {stats['longest_streak']} days.", 'contributions.sh')
+    parts = svg_start(860, 390, f"Contribution calendar for {payload['username']}",
+                      f"{stats['total']:,} contributions in the last year, {start} through {end}. Public GitHub data. Includes monthly contribution totals for the exact dates shown, longest streak in this interval: {stats['longest_streak']} days.", 'contributions.sh')
     if not static:
         parts.append('<style>@keyframes tile-in{from{opacity:0;transform:translate(-5px,-5px)}to{opacity:1;transform:translate(0,0)}}.tile{animation:tile-in .38s cubic-bezier(.22,.68,0,1) both}</style>')
     parts.extend([
@@ -68,15 +68,48 @@ def render_heatmap(payload, static=False):
         f'<text x="789" y="229" font-size="9" fill="{MUTED}">More</text>',
         '<path d="M24 247H836" stroke="#202b37"/>',
     ])
-    for x, value, label in [(24, f'{stats["current_streak"]}d', 'CURRENT STREAK'),
-                            (242, f'{stats["longest_streak"]}d', 'LONGEST / YEAR'),
-                            (465, str(stats['active_days']), 'ACTIVE DAYS')]:
-        parts.append(f'<text x="{x}" y="274" font-size="18" font-weight="700" fill="{GREEN}">{value}</text>'
-                     f'<text x="{x}" y="293" font-size="8.5" letter-spacing="1" fill="{MUTED}">{label}</text>')
+    # Monthly totals use the same exact rolling window as the calendar. Keep
+    # the date bounds in each tooltip so partial first/last months are clear.
+    month_days = {}
+    for day in payload['days']:
+        month_days.setdefault(day['date'][:7], []).append(day['date'])
+    monthly = [(month, count, month_days[month][0], month_days[month][-1])
+               for month, count in sorted(stats['monthly_totals'].items())]
+    chart_left, chart_pitch, bar_width = 35, 34, 16
+    baseline, max_bar_height = 338, 45
+    max_month = max((count for _, count, _, _ in monthly), default=0)
     parts.extend([
-        f'<text x="836" y="273" text-anchor="end" font-size="9" fill="{MUTED}">{start} → {end}</text>',
-        f'<text x="836" y="293" text-anchor="end" font-size="9" fill="{MUTED}">public activity / refreshed daily</text>',
-        f'<text x="24" y="315" font-size="8" fill="{MUTED}">UTC window · current streak allows an unfinished today</text>',
+        f'<text x="24" y="271" font-size="10" letter-spacing=".8" fill="{GREEN}">$ activity --monthly</text>',
+        f'<text x="480" y="271" text-anchor="end" font-size="8" fill="{MUTED}">{monthly[0][0].upper()} → {monthly[-1][0].upper()} · EDGE MONTHS PARTIAL</text>',
+        '<path d="M24 338H480" stroke="#263341"/>',
+    ])
+    for guide in (0.5, 1):
+        y = baseline - max_bar_height * guide
+        parts.append(f'<path d="M24 {y:g}H480" stroke="#17212b" stroke-dasharray="2 5"/>')
+    for index, (month, count, first_day, last_day) in enumerate(monthly):
+        x = chart_left + index * chart_pitch
+        height = max(2, max_bar_height * count / max_month) if max_month else 2
+        y = baseline - height
+        color = PALETTE[5] if max_month and count == max_month else PALETTE[3 if count else 0]
+        animation = f' class="tile" style="animation-delay:{index * .045:.3f}s"' if not static else ''
+        month_label = date.fromisoformat(first_day).strftime('%b')
+        parts.append(f'<rect x="{x}" y="{y:.1f}" width="{bar_width}" height="{height:.1f}" rx="3" fill="{color}" data-month="{month}" data-count="{count}"{animation}>'
+                     f'<title>{escape(month_label)} {month[:4]}: {count:,} contributions, {first_day} through {last_day}</title></rect>'
+                     f'<text x="{x + bar_width / 2:g}" y="354" text-anchor="middle" font-size="8" fill="{MUTED}">{month_label}</text>')
+    parts.append('<path d="M500 259V362" stroke="#202b37"/>')
+    metrics = [
+        (526, 290, f'{stats["current_streak"]}d', 'CURRENT STREAK'),
+        (684, 290, f'{stats["longest_streak"]}d', 'LONGEST / YEAR'),
+        (526, 337, str(stats['active_days']), 'ACTIVE DAYS'),
+        (684, 337, f'{stats["best_day"]["count"]:,}' if stats['best_day'] else '0',
+         f'BEST DAY · {date.fromisoformat(stats["best_day"]["date"]).strftime("%b %d").upper()}' if stats['best_day'] else 'BEST DAY'),
+    ]
+    for x, y, value, label in metrics:
+        parts.append(f'<text x="{x}" y="{y}" font-size="17" font-weight="700" fill="{GREEN}">{value}</text>'
+                     f'<text x="{x}" y="{y + 14}" font-size="8" letter-spacing=".7" fill="{MUTED}">{label}</text>')
+    parts.extend([
+        f'<text x="24" y="377" font-size="8" fill="{MUTED}">UTC window · current streak allows an unfinished today · hover bars for exact dates</text>',
+        f'<text x="836" y="377" text-anchor="end" font-size="8" fill="{MUTED}">{start} → {end} · public activity / refreshed daily</text>',
     ])
     return svg_end(parts)
 
@@ -97,3 +130,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
