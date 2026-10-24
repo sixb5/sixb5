@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terminal profile · preview</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #070b10; color: #c9d5e2; font-family: Consolas, monospace; }
+    main { max-width: 924px; margin: 0 auto; padding: 48px 32px; }
+    .eyebrow { color: #69f0a0; font-size: 10px; letter-spacing: .22em; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 38px; }
+    h1 { font-size: 20px; font-weight: 500; letter-spacing: -.5px; margin: 12px 0 0; }
+    a { color: #7c8b9d; text-decoration: none; font-size: 11px; }
+    a:hover { color: #69f0a0; }
+    h2 { font-size: 12px; font-weight: 400; margin: 0 0 18px; color: #7c8b9d; }
+    h2 span { color: #69f0a0; }
+    img { display: block; width: 100%; height: auto; }
+    .identity { display: grid; grid-template-columns: 370fr 490fr; gap: 0; align-items: start; }
+    .section { margin-bottom: 38px; }
+    footer { border-top: 1px solid #202b37; padding-top: 20px; display: flex; justify-content: space-between; color: #607083; font-size: 10px; }
+    @media (max-width: 640px) { main { padding: 28px 16px; } .identity { grid-template-columns: 1fr; gap: 16px; } header { gap: 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><div class="eyebrow">PROFILE / TERMINAL EDITION</div><h1>A person behind the pixels.</h1></div>
+      <a href="./preview.html">↻ replay animations</a>
+    </header>
+    <div class="section">
+      <h2><span>~ $</span> ./contributions.sh</h2>
+      <img src="./contrib-heatmap.svg" width="860" height="326" alt="Real GitHub contribution calendar">
+    </div>
+    <div class="section">
+      <h2><span>~ $</span> whoami</h2>
+      <div class="identity">
+        <img src="./avi-ascii.svg" width="370" height="440" alt="ASCII avatar">
+        <img src="./info-card.svg" width="490" alt="Neofetch profile card">
+      </div>
+    </div>
+    <footer><span>repository-owned SVG · no external widgets</span><a href="./profile.json">edit profile.json ↗</a></footer>
+  </main>
+</body>
+</html>

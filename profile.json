@@ -1,0 +1,17 @@
+{
+  "username": "sixb5",
+  "name": "sixb5",
+  "subtitle": "A little more human than a commit graph.",
+  "rows": [
+    {"label": "Now", "value": "Add your current role"},
+    {"label": "Prev", "value": "Add previous experience"},
+    {"label": "Stack", "value": "Add your languages and tools"},
+    {"label": "Highlights", "value": ["Add a project you are proud of", "Add a milestone or contribution"]}
+  ],
+  "footer": "Personalize this card in profile.json",
+  "portrait": {
+    "source": "source-prepped.png",
+    "columns": 80,
+    "rows": 46
+  }
+}
