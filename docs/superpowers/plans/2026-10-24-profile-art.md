@@ -66,5 +66,11 @@ records before atomic JSON replacement; rendering consumes those records.
   geometry) were reproduced with failing tests, fixed, and verified by the suite.
 - Identity choice: use locally authenticated `sixb5`; career details are explicit
   placeholders, and the source image is the account's public identicon.
-- Pending external steps: personal photo/details, repository publication, and an
-  actual GitHub Actions run. No remote repository was created or modified.
+- Published with the user's explicit approval to https://github.com/sixb5/sixb5
+  (public, default branch main). The initial push workflow fetched data, rendered
+  the SVG, and committed both artifacts successfully.
+- A queued manual run exposed a stale-commit checkout: its push was rejected
+  after the preceding run advanced main. Checkout now explicitly uses the current
+  branch ref, so queued runs include earlier refresh commits; push targets the
+  same branch without force.
+- Personal photo/career details remain customizable defaults.
